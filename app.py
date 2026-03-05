@@ -61,7 +61,10 @@ def main():
 
     # Fetch current settings on startup
     settings = get_remna_settings()
-    current_routing = settings.get("happRouting", "")
+    data = settings.get("response", settings)
+    settings_uuid = data["uuid"]
+    current_routing = data.get("happRouting", "")
+    log.info("Settings UUID: %s", settings_uuid)
     log.info("Current happRouting loaded (%d chars)", len(current_routing))
 
     while True:
@@ -71,7 +74,10 @@ def main():
 
             if github_deeplink != current_routing:
                 log.info("Routing changed! Updating Remna...")
-                result = patch_remna_settings({"happRouting": github_deeplink})
+                result = patch_remna_settings({
+                    "uuid": settings_uuid,
+                    "happRouting": github_deeplink,
+                })
                 current_routing = github_deeplink
                 log.info("Successfully updated happRouting in Remna")
                 log.debug("Patch response: %s", result)
