@@ -70,7 +70,7 @@ def main():
     settings = get_remna_settings()
     data = settings.get("response", settings)
     settings_uuid = data["uuid"]
-    current_routing = data.get("happRouting", "")
+    current_routing = data.get("happRouting", "") or ""
     log.info("Settings UUID: %s", settings_uuid)
     log.info("Current happRouting loaded (%d chars)", len(current_routing))
 
