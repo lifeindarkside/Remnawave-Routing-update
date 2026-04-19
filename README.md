@@ -4,10 +4,12 @@
 
 ## Как работает
 
-1. При запуске получает текущие настройки подписки из Remna API (`GET /subscription-settings`)
-2. Периодически проверяет файл `DEFAULT.DEEPLINK` в GitHub-репозитории
-3. Если содержимое изменилось — отправляет обновление в Remna (`PATCH /subscription-settings`)
+1. При запуске получает текущий `happRouting` из настроек подписки (`GET /subscription-settings`) и из каждого настроенного внешнего сквада (`GET /external-squads/{uuid}`)
+2. Периодически проверяет файлы с роутингом на GitHub
+3. Если содержимое изменилось — отправляет обновление в Remna
 4. Если изменений нет — ничего не делает
+
+Настройки подписки и каждый внешний сквад отслеживаются **независимо**: у каждого свой GitHub URL и свой кеш текущего роутинга. Изменение в одном не затрагивает остальные.
 
 ## Быстрый старт
 
@@ -99,8 +101,24 @@ docker compose up -d
 |---|---|---|---|
 | `REMNA_BASE_URL` | да | — | Базовый URL API Remna (например `https://host/api` или `http://remnawave-backend:3000/api`) |
 | `REMNA_TOKEN` | да | — | Bearer-токен для авторизации в Remna API |
-| `GITHUB_RAW_URL` | нет | [DEFAULT.DEEPLINK](https://raw.githubusercontent.com/hydraponique/roscomvpn-happ-routing/refs/heads/main/HAPP/DEFAULT.DEEPLINK) | URL файла с роутингом на GitHub |
-| `CHECK_INTERVAL` | нет | `300` | Интервал проверки обновлений (в секундах) |
+| `GITHUB_RAW_URL` | нет | [DEFAULT.DEEPLINK](https://raw.githubusercontent.com/hydraponique/roscomvpn-happ-routing/refs/heads/main/HAPP/DEFAULT.DEEPLINK) | URL файла с роутингом для настроек подписки |
+| `CHECK_INTERVAL` | нет | `300` | Интервал проверки обновлений (в секундах), общий для всех |
+| `SQUAD_N_UUID` | нет | — | UUID внешнего сквада (N = 1, 2, 3, ...) |
+| `SQUAD_N_URL` | нет | — | GitHub URL файла с роутингом для этого сквада |
+
+### Внешние скводы
+
+Для каждого сквада задаётся пара переменных с порядковым номером:
+
+```env
+SQUAD_1_UUID=your-first-squad-uuid-here
+SQUAD_1_URL=https://raw.githubusercontent.com/.../SQUAD1.DEEPLINK
+
+SQUAD_2_UUID=your-second-squad-uuid-here
+SQUAD_2_URL=https://raw.githubusercontent.com/.../SQUAD2.DEEPLINK
+```
+
+Количество сквадов не ограничено. Если переменные не заданы — синхронизируются только настройки подписки.
 
 ## Логи
 
