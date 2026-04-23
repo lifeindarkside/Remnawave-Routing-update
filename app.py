@@ -39,7 +39,7 @@ def load_squad_configs() -> list:
         url = os.environ.get(f"SQUAD_{i}_URL", "").strip()
         if not uuid or not url:
             break
-        squads.append({"uuid": uuid, "url": url, "current_routing": None})
+        squads.append({"uuid": uuid, "url": url, "current_routing": None, "current_settings": {}})
         i += 1
     return squads
 
@@ -78,11 +78,12 @@ def get_external_squad(squad_uuid: str) -> dict:
     return resp.json()
 
 
-def patch_external_squad(squad_uuid: str, routing: str) -> dict:
+def patch_external_squad(squad_uuid: str, routing: str, current_settings: dict) -> dict:
+    merged = {**current_settings, "happRouting": routing}
     resp = requests.patch(
         f"{REMNA_BASE_URL}/external-squads",
         headers={**REMNA_HEADERS, "Content-Type": "application/json"},
-        json={"uuid": squad_uuid, "subscriptionSettings": {"happRouting": routing}},
+        json={"uuid": squad_uuid, "subscriptionSettings": merged},
         timeout=30,
         verify=SSL_VERIFY,
     )
@@ -116,7 +117,8 @@ def main():
         try:
             data = get_external_squad(squad["uuid"])
             squad_data = data.get("response", data)
-            squad["current_routing"] = (squad_data.get("subscriptionSettings", {}).get("happRouting", "") or "").strip()
+            squad["current_settings"] = squad_data.get("subscriptionSettings", {}) or {}
+            squad["current_routing"] = (squad["current_settings"].get("happRouting", "") or "").strip()
             log.info("Squad %s current happRouting loaded (%d chars)", squad["uuid"], len(squad["current_routing"]))
         except Exception:
             log.exception("Failed to fetch initial routing for squad %s, will update on first cycle", squad["uuid"])
@@ -127,26 +129,27 @@ def main():
             log.info("Fetched GitHub deeplink (%d chars)", len(github_deeplink))
 
             if github_deeplink != current_routing:
-                log.info("Routing changed! Updating Remna...")
+                log.info("Routing changed! Updating subscription settings...")
                 result = patch_remna_settings({
                     "uuid": settings_uuid,
                     "happRouting": github_deeplink,
                 })
                 current_routing = github_deeplink
-                log.info("Successfully updated happRouting in Remna")
+                log.info("Successfully updated happRouting in subscription settings")
                 log.debug("Patch response: %s", result)
             else:
-                log.info("No changes detected")
+                log.info("No changes detected in subscription settings")
 
         except Exception:
-            log.exception("Error during check cycle")
+            log.exception("Error during subscription settings check cycle")
 
         for squad in squads:
             try:
                 deeplink = get_github_deeplink(squad["url"])
                 if deeplink != squad["current_routing"]:
                     log.info("Routing changed for squad %s! Updating...", squad["uuid"])
-                    patch_external_squad(squad["uuid"], deeplink)
+                    patch_external_squad(squad["uuid"], deeplink, squad["current_settings"])
+                    squad["current_settings"] = {**squad["current_settings"], "happRouting": deeplink}
                     squad["current_routing"] = deeplink
                     log.info("Successfully updated happRouting for squad %s", squad["uuid"])
                 else:
