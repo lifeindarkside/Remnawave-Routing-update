@@ -47,13 +47,13 @@ services:
 Создайте файл `.env`:
 
 ```env
-REMNA_BASE_URL=http://remnawave-backend:3000/api
+REMNA_BASE_URL=http://remnawave:3000/api
 REMNA_TOKEN=your_bearer_token
 # GITHUB_RAW_URL=https://raw.githubusercontent.com/hydraponique/roscomvpn-happ-routing/refs/heads/main/HAPP/DEFAULT.DEEPLINK
 # CHECK_INTERVAL=300
 ```
 
-> `remnawave-backend` — имя контейнера панели, `3000` — порт по умолчанию. Измените при необходимости.
+> `remnawave` — имя контейнера панели, `3000` — порт по умолчанию. Измените при необходимости.
 
 Создайте файл `docker-compose.yml`:
 
