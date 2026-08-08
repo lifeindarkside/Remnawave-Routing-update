@@ -99,7 +99,7 @@ docker compose up -d
 
 | Переменная | Обязательная | По умолчанию | Описание |
 |---|---|---|---|
-| `REMNA_BASE_URL` | да | — | Базовый URL API Remna (например `https://host/api` или `http://remnawave-backend:3000/api`) |
+| `REMNA_BASE_URL` | да | — | Базовый URL API Remna (например `https://host/api` или `http://remnawave:3000/api`) |
 | `REMNA_TOKEN` | да | — | Bearer-токен для авторизации в Remna API |
 | `GITHUB_RAW_URL` | нет | [DEFAULT.DEEPLINK](https://raw.githubusercontent.com/hydraponique/roscomvpn-happ-routing/refs/heads/main/HAPP/DEFAULT.DEEPLINK) | URL файла с роутингом для настроек подписки |
 | `CHECK_INTERVAL` | нет | `300` | Интервал проверки обновлений (в секундах), общий для всех |
