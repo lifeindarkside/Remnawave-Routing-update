@@ -1,12 +1,12 @@
 # Remna Routing Updater
 
-Микросервис для автоматического обновления `happRouting` в Remna панели при появлении новых данных в GitHub-репозитории [roscomvpn-happ-routing](https://github.com/hydraponique/roscomvpn-happ-routing).
+Микросервис для автоматического обновления кастомного заголовка ответа `routing` в Remna панели при появлении новых данных в GitHub-репозитории [roscomvpn-happ-routing](https://github.com/hydraponique/roscomvpn-happ-routing).
 
 ## Как работает
 
-1. При запуске получает текущий `happRouting` из настроек подписки (`GET /subscription-settings`) и из каждого настроенного внешнего сквада (`GET /external-squads/{uuid}`)
+1. При запуске получает заголовок `routing` из настроек подписки и из настроек каждого настроенного внешнего сквада
 2. Проверяет файлы с роутингом на GitHub — по интервалу (`CHECK_INTERVAL`) или по расписанию (`CRON_SCHEDULE`)
-3. Если содержимое изменилось — отправляет обновление в Remna
+3. Если содержимое изменилось — отправляет новое содержимое заголовка `routing` в Remna
 4. Если изменений нет — ничего не делает
 
 Настройки подписки и каждый внешний сквад отслеживаются **независимо**: у каждого свой GitHub URL и свой кеш текущего роутинга. Изменение в одном не затрагивает остальные.
@@ -47,13 +47,13 @@ services:
 Создайте файл `.env`:
 
 ```env
-REMNA_BASE_URL=http://remnawave-backend:3000/api
+REMNA_BASE_URL=http://remnawave:3000/api
 REMNA_TOKEN=your_bearer_token
 # GITHUB_RAW_URL=https://raw.githubusercontent.com/hydraponique/roscomvpn-happ-routing/refs/heads/main/HAPP/DEFAULT.DEEPLINK
 # CHECK_INTERVAL=300
 ```
 
-> `remnawave-backend` — имя контейнера панели, `3000` — порт по умолчанию. Измените при необходимости.
+> `remnawave` — имя контейнера панели, `3000` — порт по умолчанию. Измените при необходимости.
 
 Создайте файл `docker-compose.yml`:
 
@@ -99,7 +99,7 @@ docker compose up -d
 
 | Переменная | Обязательная | По умолчанию | Описание |
 |---|---|---|---|
-| `REMNA_BASE_URL` | да | — | Базовый URL API Remna (например `https://host/api` или `http://remnawave-backend:3000/api`) |
+| `REMNA_BASE_URL` | да | — | Базовый URL API Remna (например `https://host/api` или `http://remnawave:3000/api`) |
 | `REMNA_TOKEN` | да | — | Bearer-токен для авторизации в Remna API |
 | `GITHUB_RAW_URL` | нет | [DEFAULT.DEEPLINK](https://raw.githubusercontent.com/hydraponique/roscomvpn-happ-routing/refs/heads/main/HAPP/DEFAULT.DEEPLINK) | URL файла с роутингом для настроек подписки |
 | `CHECK_INTERVAL` | нет | `300` | Интервал проверки обновлений (в секундах), общий для всех |
